@@ -1,0 +1,8 @@
+{
+	"BuildId": "19505902",
+	"Modules": 
+	{
+		"AutomationTesting": "UnrealEditor-AutomationTesting.dll",
+		"SimpleProjectTestEditor": "UnrealEditor-SimpleProjectTestEditor.dll"
+	}
+}
