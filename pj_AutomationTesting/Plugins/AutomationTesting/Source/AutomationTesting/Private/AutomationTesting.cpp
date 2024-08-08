@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AutomationTesting.h"
 #include "AutomationTestType.h"
@@ -9,6 +9,7 @@
 #include "Automation/SimpleProjectAutomation.h"
 #include "Settings/SimpleProjectTestSettings.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
+#include "AutomationTestLog.h"
 #include "zlib.h"
 
 
@@ -313,6 +314,46 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 			return true;
 		}
+		case WM_INPUT:
+		{
+			OnMouseMove();
+			break;
+		}
+		case WM_NCMOUSEMOVE:
+		case WM_MOUSEMOVE:
+		{
+			OnMouseMove();
+			break;
+		}
+		case WM_TOUCH:
+		{
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			const float SpinFactor = 1 / 120.0f;
+			const SHORT WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+			POINT CursorPoint;
+			CursorPoint.x = GET_X_LPARAM(lParam);
+			CursorPoint.y = GET_Y_LPARAM(lParam);
+
+			const FVector2D CursorPos(CursorPoint.x, CursorPoint.y);
+
+			return OnMouseWheel(static_cast<float>(WheelDelta) * SpinFactor, FSlateApplication::Get().GetCursorPos());
+
+			return false;
+		}
+		case WM_MOUSEACTIVATE:
+		case WM_ACTIVATE:
+		case WM_ACTIVATEAPP:
+		case WM_SETTINGCHANGE:
+		case WM_CLOSE:
+		{
+			break;
+		}
+		default:
+			break;
 
 	}
 
@@ -321,21 +362,25 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 bool FAutomationTestingModule::OnMouseUp(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnMouseUP : Cursor = %s"), *InCursorPos.ToString());
 	return false;
 }
 
 bool FAutomationTestingModule::OnMouseDoubleClick(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnMouseDoubleClick : Cursor = %s"), *InCursorPos.ToString());
 	return false;
 }
 
 bool FAutomationTestingModule::OnMouseDown(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnMouseDown : Cursor = %s"), *InCursorPos.ToString());
 	return false;
 }
 
 bool FAutomationTestingModule::OnMouseWheel(const float Delta, const FVector2D& InCursorPos)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnMouseWheel : Delta = %f"), Delta);
 	return false;
 }
 
@@ -346,11 +391,13 @@ bool FAutomationTestingModule::OnMouseMove()
 
 bool FAutomationTestingModule::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnKeyUp : Key = %i, isRepeat = %i"), KeyCode, bIsRepeat);
 	return false;
 }
 
 bool FAutomationTestingModule::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnKeyDown : Key = %i, isRepeat = %i"), KeyCode, bIsRepeat);
 	return false;
 }
 

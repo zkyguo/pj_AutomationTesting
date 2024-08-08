@@ -27,6 +27,9 @@ class UAutomationTestingBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Execute Sample function", Keywords = "AutomationTesting sample test testing"), Category = "AutomationTestingTesting")
-	static float AutomationTestingSampleFunction(float Param);
+	UFUNCTION(BlueprintCallable, meta=(Category = "ProjectTest"))
+	static bool StartRecording();
+
+	UFUNCTION(BlueprintCallable, meta = (Category = "ProjectTest"))
+	static bool StopRecording(const FString& InSavePath);
 };
