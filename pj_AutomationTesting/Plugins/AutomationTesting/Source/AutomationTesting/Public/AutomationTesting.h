@@ -33,7 +33,18 @@ public:
 	bool OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat);
 	bool OnKeyChar(const TCHAR Character, const bool IsRepeat);
 
+	UWorld* GetWorld()const;
+	void SetWorld(UWorld* InWorld);
+
 protected:
 	bool ModifierKeyState[EProjectTestModifierKey::Count];
 
+	EProjectTestState TestState;
+	TArray<TSharedPtr<FProjectTestBaseData>> InputData;
+	TArray<TSharedPtr<FProjectTestBaseData>> AxialInputData;
+
+	float CurrentTime;
+
+	TWeakObjectPtr<UWorld> World;
+	uint8 MixCount;
 };

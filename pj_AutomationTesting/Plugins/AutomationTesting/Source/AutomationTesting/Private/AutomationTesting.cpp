@@ -22,6 +22,8 @@ THIRD_PARTY_INCLUDES_END
 
 FAutomationTestingModule::FAutomationTestingModule()
 {
+	MixCount = 0;
+	TestState = EProjectTestState::Free;
 	FMemory::Memset(ModifierKeyState, 0, (int32)EProjectTestModifierKey::Count + 1);
 }
 
@@ -43,6 +45,12 @@ void FAutomationTestingModule::StartRecording()
 	FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
 	check(WindowsApplication);
 	WindowsApplication->AddMessageHandler(*this);
+
+	TestState = EProjectTestState::Recording;
+
+	CurrentTime = 0.f;
+	InputData.Empty();
+	AxialInputData.Empty();
 }
 
 void FAutomationTestingModule::StopRecording()
@@ -51,7 +59,8 @@ void FAutomationTestingModule::StopRecording()
 	{
 		WindowsApplication->RemoveMessageHandler(*this);
 	}
-
+	TestState = EProjectTestState::Free;
+	CurrentTime = 0.f;
 }
 
 TStatId FAutomationTestingModule::GetStatId() const
@@ -61,6 +70,10 @@ TStatId FAutomationTestingModule::GetStatId() const
 
 void FAutomationTestingModule::Tick(float DeltaTime)
 {
+	if(TestState != EProjectTestState::Free)
+	{
+		CurrentTime += DeltaTime;
+	}
 }
 
 bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam,
@@ -404,6 +417,16 @@ bool FAutomationTestingModule::OnKeyDown(const int32 KeyCode, const uint32 Chara
 bool FAutomationTestingModule::OnKeyChar(const TCHAR Character, const bool IsRepeat)
 {
 	return false;
+}
+
+UWorld* FAutomationTestingModule::GetWorld() const
+{
+	return World.Get();
+}
+
+void FAutomationTestingModule::SetWorld(UWorld* InWorld)
+{
+	World = InWorld;
 }
 
 #undef LOCTEXT_NAMESPACE

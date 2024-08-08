@@ -24,3 +24,16 @@ bool UAutomationTestingBPLibrary::StopRecording(const FString& InSavePath)
 
 	return false;
 }
+
+void UAutomationTestingBPLibrary::Register(UObject* InObject)
+{
+	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
+	if(UWorld* InWorld = Cast<UWorld>(InObject))
+	{
+		InModule.SetWorld(InWorld);
+	}
+	else if(AActor* InActor = Cast<AActor>(InObject))
+	{
+		InModule.SetWorld(Cast<UWorld>(InActor->GetWorld()));
+	}
+}
