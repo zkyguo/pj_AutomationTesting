@@ -37,3 +37,16 @@ void UAutomationTestingBPLibrary::Register(UObject* InObject)
 		InModule.SetWorld(Cast<UWorld>(InActor->GetWorld()));
 	}
 }
+
+void UAutomationTestingBPLibrary::BuildInputAxial(const FKey& InKey, const FVector2D& Value)
+{
+	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
+	InModule.BuildInputAxial(InKey, Value);
+}
+
+void UAutomationTestingBPLibrary::BuildInput(const FKey& InKey, EInputEvent InputEvent, const FVector2D& InCursorPos,
+	bool bIsRepeat, float InDelta, EMouseButtons::Type MouseButtons)
+{
+	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
+	InModule.BuildInput(InKey, InputEvent, FSlateApplication::Get().GetCursorPos(), bIsRepeat, InDelta);
+}
