@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AutomationTesting.h"
-
 #include "AutomationTestType.h"
 #include "Windows/WindowsWindow.h"
 #include "InputCoreTypes.h"
@@ -15,6 +14,7 @@
 
 THIRD_PARTY_INCLUDES_START
 #include <Windows.h>
+#include <windowsx.h>
 THIRD_PARTY_INCLUDES_END
 
 #define LOCTEXT_NAMESPACE "FAutomationTestingModule"
@@ -222,6 +222,96 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 				return true;
 			}
 			break;
+		}
+		// Mouse Button Down
+		case WM_LBUTTONDBLCLK:
+		case WM_LBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
+		case WM_XBUTTONDBLCLK:
+		case WM_XBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_XBUTTONUP:
+		{
+			POINT CursorPoint;
+			CursorPoint.x = GET_X_LPARAM(lParam);
+			CursorPoint.y = GET_Y_LPARAM(lParam);
+
+			EMouseButtons::Type MouseButton = EMouseButtons::Invalid;
+
+			bool bDoubleClick = false;
+			bool bMouseUp = false;
+
+			switch (msg)
+			{
+			case WM_LBUTTONDBLCLK:
+				bDoubleClick = true;
+				MouseButton = EMouseButtons::Left;
+				break;
+			case WM_LBUTTONUP:
+				bMouseUp = true;
+				MouseButton = EMouseButtons::Left;
+				break;
+			case WM_LBUTTONDOWN:
+				MouseButton = EMouseButtons::Left;
+				break;
+			case WM_MBUTTONDBLCLK:
+				bDoubleClick = true;
+				MouseButton = EMouseButtons::Middle;
+				break;
+			case WM_MBUTTONUP:
+				bMouseUp = true;
+				MouseButton = EMouseButtons::Middle;
+				break;
+			case WM_MBUTTONDOWN:
+				MouseButton = EMouseButtons::Middle;
+				break;
+			case WM_RBUTTONDBLCLK:
+				bDoubleClick = true;
+				MouseButton = EMouseButtons::Right;
+				break;
+			case WM_RBUTTONUP:
+				bMouseUp = true;
+				MouseButton = EMouseButtons::Right;
+				break;
+			case WM_RBUTTONDOWN:
+				MouseButton = EMouseButtons::Right;
+				break;
+			case WM_XBUTTONDBLCLK:
+				bDoubleClick = true;
+				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+				break;
+			case WM_XBUTTONUP:
+				bMouseUp = true;
+				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+				break;
+			case WM_XBUTTONDOWN:
+				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+				break;
+			default:
+				check(0);
+			}
+
+			const FVector2D APPCursorPoint = FSlateApplication::Get().GetCursorPos();
+
+			if (bMouseUp)
+			{
+				return OnMouseUp(MouseButton, APPCursorPoint) ? 0 : 1;
+			}
+			else if (bDoubleClick)
+			{
+				OnMouseDoubleClick(MouseButton, APPCursorPoint);
+			}
+			else
+			{
+				OnMouseDown(MouseButton, APPCursorPoint);
+			}
+
+			return true;
 		}
 
 	}
