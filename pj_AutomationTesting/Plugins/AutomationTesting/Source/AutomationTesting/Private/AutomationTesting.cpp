@@ -1,14 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AutomationTesting.h"
+
+#include "AutomationTestType.h"
 #include "Windows/WindowsWindow.h"
 #include "InputCoreTypes.h"
-#include "zlib.h"
 #include "Stream/SimpleProjectStream.h"
 #include "Misc/ICompressionFormat.h"
 #include "Automation/SimpleProjectAutomation.h"
 #include "Settings/SimpleProjectTestSettings.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
+#include "zlib.h"
 
 
 THIRD_PARTY_INCLUDES_START
@@ -16,6 +18,11 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 
 #define LOCTEXT_NAMESPACE "FAutomationTestingModule"
+
+FAutomationTestingModule::FAutomationTestingModule()
+{
+	FMemory::Memset(ModifierKeyState, 0, (int32)EProjectTestModifierKey::Count + 1);
+}
 
 void FAutomationTestingModule::StartupModule()
 {
@@ -80,7 +87,60 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 			switch (Win32Key)
 			{
+				case VK_MENU:
+				{
+					if ((lParam & 0x1000000) == 0)
+					{
+						ActualKey = VK_LMENU;
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftAlt];
+						ModifierKeyState[EProjectTestModifierKey::LeftAlt] = true;
+					}
+					else
+					{
+						ActualKey = VK_RMENU;
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightAlt];
+						ModifierKeyState[EProjectTestModifierKey::RightAlt] = true;
+					}
 
+					break;
+				}
+				case VK_CONTROL:
+				{
+					if ((lParam & 0x1000000) == 0)
+					{
+						ActualKey = VK_LCONTROL;
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftControl];
+						ModifierKeyState[EProjectTestModifierKey::LeftControl] = true;
+					}
+					else
+					{
+						ActualKey = VK_RCONTROL;
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightControl];
+						ModifierKeyState[EProjectTestModifierKey::RightControl] = true;
+					}
+					break;
+				}
+				case VK_SHIFT:
+				{
+					ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
+					if (ActualKey == VK_LSHIFT)
+					{
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftShift];
+						ModifierKeyState[EProjectTestModifierKey::LeftShift] = true;
+					}
+					else
+					{
+						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightShift];
+						ModifierKeyState[EProjectTestModifierKey::RightShift] = true;
+					}
+					break;
+				}
+				case VK_CAPITAL:
+					ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+					break;
+				default:
+					// No translation needed
+					break;
 			}
 			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
 			const bool Result = OnKeyDown(ActualKey, CharCode, bIsRepeat);
@@ -103,6 +163,51 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 			switch (Win32Key)
 			{
+				case VK_MENU:
+					// Differentiate between left and right alt
+					if ((lParam & 0x1000000) == 0)
+					{
+						ActualKey = VK_LMENU;
+						ModifierKeyState[EProjectTestModifierKey::LeftAlt] = false;
+					}
+					else
+					{
+						ActualKey = VK_RMENU;
+						ModifierKeyState[EProjectTestModifierKey::RightAlt] = false;
+					}
+					break;
+				case VK_CONTROL:
+					// Differentiate between left and right control
+					if ((lParam & 0x1000000) == 0)
+					{
+						ActualKey = VK_LCONTROL;
+						ModifierKeyState[EProjectTestModifierKey::LeftControl] = false;
+					}
+					else
+					{
+						ActualKey = VK_RCONTROL;
+						ModifierKeyState[EProjectTestModifierKey::RightControl] = false;
+					}
+					break;
+				case VK_SHIFT:
+					// Differentiate between left and right shift
+					ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
+					if (ActualKey == VK_LSHIFT)
+					{
+						ModifierKeyState[EProjectTestModifierKey::LeftShift] = false;
+					}
+					else
+					{
+						ModifierKeyState[EProjectTestModifierKey::RightShift] = false;
+					}
+					break;
+				case VK_CAPITAL:
+					ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+					break;
+				default:
+					// No translation needed
+					break;
+
 			}
 
 			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);

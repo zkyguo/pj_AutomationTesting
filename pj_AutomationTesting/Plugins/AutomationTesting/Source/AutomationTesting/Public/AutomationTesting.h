@@ -2,18 +2,18 @@
 
 #pragma once
 
+#include "AutomationTestType.h"
 #include "Modules/ModuleManager.h"
 #include "Windows/WindowsApplication.h"
 
 class FAutomationTestingModule : public IModuleInterface, public IWindowsMessageHandler, public FTickableGameObject
 {
 public:
-
+	FAutomationTestingModule();
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-
-public :
+	
 	void StartRecording();
 	void StopRecording();
 
@@ -32,4 +32,8 @@ public :
 	bool OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat);
 	bool OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat);
 	bool OnKeyChar(const TCHAR Character, const bool IsRepeat);
+
+protected:
+	bool ModifierKeyState[EProjectTestModifierKey::Count];
+
 };
