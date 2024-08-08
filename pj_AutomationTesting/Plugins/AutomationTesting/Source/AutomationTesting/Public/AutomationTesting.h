@@ -33,6 +33,13 @@ public:
 	bool OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat);
 	bool OnKeyChar(const TCHAR Character, const bool IsRepeat);
 
+	void BuildInputAxial(const FKey& InKey, const FVector2D& Value);
+	void BuildInput(const FKey& InKey, EInputEvent InputEvent, const FVector2D& InCursorPos, bool bIsRepeat, float InDelta = 0.f, EMouseButtons::Type MouseButtons = EMouseButtons::Type::Invalid);
+
+	bool IsRecording() const { return TestState == EProjectTestState::Recording; }
+	bool IsPlaying() const { return TestState == EProjectTestState::Playing; }
+	float GetCurrentTime() const { return CurrentTime; }
+
 	UWorld* GetWorld()const;
 	void SetWorld(UWorld* InWorld);
 

@@ -419,6 +419,55 @@ bool FAutomationTestingModule::OnKeyChar(const TCHAR Character, const bool IsRep
 	return false;
 }
 
+void FAutomationTestingModule::BuildInputAxial(const FKey& InKey, const FVector2D& Value)
+{
+	if (World.IsValid())
+	{
+		if (IsRecording())
+		{
+			TSharedPtr<FProjectTestInputAxial> ProjectTestInputAxial = MakeShareable(new FProjectTestInputAxial());
+			ProjectTestInputAxial->InputType = EProjectTestInputType::InputAxial;
+			ProjectTestInputAxial->Key = InKey;
+			ProjectTestInputAxial->DurationTime = CurrentTime;
+			ProjectTestInputAxial->DeltaTime = World->GetDeltaSeconds();
+			ProjectTestInputAxial->Value = Value;
+
+			AxialInputData.Add(ProjectTestInputAxial);
+		}
+	}
+}
+
+void FAutomationTestingModule::BuildInput(const FKey& InKey, EInputEvent InputEvent, const FVector2D& InCursorPos,
+	bool bIsRepeat, float InDelta, EMouseButtons::Type MouseButtons)
+{
+	if (World.IsValid())
+	{
+		if (IsRecording())
+		{
+			TSharedPtr<FProjectTestKey> ProjectTestKey = MakeShareable(new FProjectTestKey());
+			ProjectTestKey->InputType = EProjectTestInputType::Input;
+			ProjectTestKey->Key = InKey;
+			ProjectTestKey->InputEvent = bIsRepeat ? EInputEvent::IE_Repeat : InputEvent;
+			ProjectTestKey->bIsRepeat = bIsRepeat;
+			ProjectTestKey->DurationTime = CurrentTime;
+			ProjectTestKey->CursorPos = InCursorPos;
+			ProjectTestKey->Delta = InDelta;
+			ProjectTestKey->MouseButtons = MouseButtons;
+
+			FMemory::Memcpy(ProjectTestKey->ModifierKeyState, ModifierKeyState, (int32)EProjectTestModifierKey::Count + 1);
+
+			if(World->GetFirstPlayerController())
+			{
+				ProjectTestKey->bShowMouseCursor = World->GetFirstPlayerController()->bShowMouseCursor;
+			}
+
+			UE_LOG(AutomationTestingLog, Display, TEXT("bShowMouseCursor %i"), ProjectTestKey->bShowMouseCursor);
+
+			InputData.Add(ProjectTestKey);
+		}
+	}
+}
+
 UWorld* FAutomationTestingModule::GetWorld() const
 {
 	return World.Get();
