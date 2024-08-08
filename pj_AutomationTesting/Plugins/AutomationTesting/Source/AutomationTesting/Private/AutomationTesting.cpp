@@ -58,6 +58,109 @@ void FAutomationTestingModule::Tick(float DeltaTime)
 bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam,
 	int32& OutResult)
 {
+	OutResult = 1;
+
+	switch (msg)
+	{
+		case WM_CHAR:
+		{
+			const TCHAR Character = IntCastChecked<TCHAR>(wParam);
+			const bool bIsRepeat = (lParam & 0x40000000) != 0;
+			OnKeyChar(Character, bIsRepeat);
+
+			return true;
+		}
+		case WM_SYSKEYDOWN:
+		case WM_KEYDOWN:
+		{
+			const int32 Win32Key = IntCastChecked<int32>(wParam);
+			int32 ActualKey = Win32Key;
+
+			bool bIsRepeat = (lParam & 0x40000000) != 0;
+
+			switch (Win32Key)
+			{
+
+			}
+			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
+			const bool Result = OnKeyDown(ActualKey, CharCode, bIsRepeat);
+
+			if (Result || wParam != WM_SYSKEYDOWN)
+			{
+				// Handled
+				return true;
+			}
+			break;
+		}
+		case WM_SYSKEYUP:
+		case WM_KEYUP:
+		{
+			int32 Win32Key = IntCastChecked<int32>(wParam);
+
+			int32 ActualKey = Win32Key;
+
+			bool bModifierKeyReleased = false;
+
+			switch (Win32Key)
+			{
+			}
+
+			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
+
+			const bool bIsRepeat = false;
+
+			const bool Result = OnKeyUp(ActualKey, CharCode, bIsRepeat);
+
+			if (Result || wParam != WM_SYSKEYUP)
+			{
+				// Handled
+				return true;
+			}
+			break;
+		}
+
+	}
+
+	return false;
+}
+
+bool FAutomationTestingModule::OnMouseUp(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnMouseDoubleClick(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnMouseDown(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnMouseWheel(const float Delta, const FVector2D& InCursorPos)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnMouseMove()
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
+{
+	return false;
+}
+
+bool FAutomationTestingModule::OnKeyChar(const TCHAR Character, const bool IsRepeat)
+{
 	return false;
 }
 
