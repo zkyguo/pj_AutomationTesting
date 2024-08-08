@@ -11,6 +11,7 @@
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "AutomationTestLog.h"
 #include "zlib.h"
+#include "Core/AutomationProjectTestMethod.h"
 
 
 THIRD_PARTY_INCLUDES_START
@@ -375,12 +376,30 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 bool FAutomationTestingModule::OnMouseUp(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
 {
+
+	BuildInput(
+		AutomationProjectTestMethod::GetMouseKey(MouseButton),
+		EInputEvent::IE_Released,
+		InCursorPos,
+		false,
+		0.f,
+		MouseButton);
+
+
 	UE_LOG(LogTemp, Display, TEXT("OnMouseUP : Cursor = %s"), *InCursorPos.ToString());
 	return false;
 }
 
 bool FAutomationTestingModule::OnMouseDoubleClick(EMouseButtons::Type MouseButton, const FVector2D& InCursorPos)
 {
+	BuildInput(
+		AutomationProjectTestMethod::GetMouseKey(MouseButton),
+		EInputEvent::IE_DoubleClick,
+		InCursorPos,
+		false,
+		0.f,
+		MouseButton);
+
 	UE_LOG(LogTemp, Display, TEXT("OnMouseDoubleClick : Cursor = %s"), *InCursorPos.ToString());
 	return false;
 }
@@ -393,29 +412,69 @@ bool FAutomationTestingModule::OnMouseDown(EMouseButtons::Type MouseButton, cons
 
 bool FAutomationTestingModule::OnMouseWheel(const float Delta, const FVector2D& InCursorPos)
 {
+	BuildInput(
+		EKeys::MouseWheelAxis,
+		EInputEvent::IE_Axis,
+		InCursorPos,
+		false,
+		Delta,
+		EMouseButtons::Middle);
+
 	UE_LOG(LogTemp, Display, TEXT("OnMouseWheel : Delta = %f"), Delta);
 	return false;
 }
 
 bool FAutomationTestingModule::OnMouseMove()
 {
+	if (World.IsValid() && World->GetFirstPlayerController())
+	{
+		FVector2D Delta;
+		World->GetFirstPlayerController()->GetInputMouseDelta(Delta.X, Delta.Y);
+
+		if (Delta.Size() > 0)
+		{
+			BuildInputAxial(EKeys::Mouse2D, Delta);
+
+			UE_LOG(LogTemp, Display, TEXT("OnMouseMove DeltaX=%f,DeltaY=%f"), Delta.X, Delta.Y);
+		}
+	}
+
 	return false;
 }
 
 bool FAutomationTestingModule::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
 {
+
+	BuildInput(
+		AutomationProjectTestMethod::KeyCodeToFKey(KeyCode),
+		EInputEvent::IE_Released,
+		FSlateApplication::Get().GetCursorPos(),
+		bIsRepeat);
+
 	UE_LOG(LogTemp, Display, TEXT("OnKeyUp : Key = %i, isRepeat = %i"), KeyCode, bIsRepeat);
 	return false;
 }
 
 bool FAutomationTestingModule::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, bool bIsRepeat)
 {
+
+	BuildInput(
+		AutomationProjectTestMethod::KeyCodeToFKey(KeyCode),
+		EInputEvent::IE_Pressed,
+		FSlateApplication::Get().GetCursorPos(),
+		bIsRepeat);
+
 	UE_LOG(LogTemp, Display, TEXT("OnKeyDown : Key = %i, isRepeat = %i"), KeyCode, bIsRepeat);
 	return false;
 }
 
 bool FAutomationTestingModule::OnKeyChar(const TCHAR Character, const bool IsRepeat)
 {
+
+	FKey K = AutomationProjectTestMethod::GetFKeyFromCharCode(Character);
+
+	UE_LOG(LogTemp, Display, TEXT("IsRepeat=%i,KeyChar %s"), IsRepeat, *K.ToString());
+
 	return false;
 }
 

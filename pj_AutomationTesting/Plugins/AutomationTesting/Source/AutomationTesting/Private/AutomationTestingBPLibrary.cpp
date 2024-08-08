@@ -44,8 +44,7 @@ void UAutomationTestingBPLibrary::BuildInputAxial(const FKey& InKey, const FVect
 	InModule.BuildInputAxial(InKey, Value);
 }
 
-void UAutomationTestingBPLibrary::BuildInput(const FKey& InKey, EInputEvent InputEvent, const FVector2D& InCursorPos,
-	bool bIsRepeat, float InDelta, EMouseButtons::Type MouseButtons)
+void UAutomationTestingBPLibrary::BuildInput(const FKey& InKey, EInputEvent InputEvent, bool bIsRepeat, float InDelta)
 {
 	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
 	InModule.BuildInput(InKey, InputEvent, FSlateApplication::Get().GetCursorPos(), bIsRepeat, InDelta);

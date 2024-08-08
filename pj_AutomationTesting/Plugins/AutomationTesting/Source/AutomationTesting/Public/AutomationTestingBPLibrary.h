@@ -36,10 +36,10 @@ class UAutomationTestingBPLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, meta = (Category = "ProjectTest"))
 	static void Register(UObject* InObject);
 
-public :
 	UFUNCTION(BlueprintCallable, meta = (Category = "Build"))
-	void BuildInputAxial(const FKey& InKey, const FVector2D& Value);
+	static void BuildInputAxial(const FKey& InKey, const FVector2D& Value);
 
 	UFUNCTION(BlueprintCallable, meta = (Category = "Build"))
-	void BuildInput(const FKey& InKey, EInputEvent InputEvent, const FVector2D& InCursorPos, bool bIsRepeat, float InDelta = 0.f, EMouseButtons::Type MouseButtons = EMouseButtons::Type::Invalid);
+	static void BuildInput(const FKey& InKey, EInputEvent InputEvent, bool bIsRepeat = false, float InDelta = 0.f);
+
 };

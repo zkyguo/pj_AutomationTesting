@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
 
-namespace SimpleProjectTestMethod
+
+namespace AutomationProjectTestMethod
 {
 	AUTOMATIONTESTING_API FKey KeyCodeToFKey(int32 KeyCode);
 	AUTOMATIONTESTING_API int32 FKeyToKeyCode(const FKey& Key);
