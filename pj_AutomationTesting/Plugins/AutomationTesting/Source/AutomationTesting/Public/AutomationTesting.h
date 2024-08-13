@@ -17,6 +17,9 @@ public:
 	void StartRecording();
 	void StopRecording();
 
+	void StartPlay();
+	void StopPlay();
+
 	virtual TStatId GetStatId() const override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam, int32& OutResult) override;
@@ -42,6 +45,9 @@ public:
 
 	UWorld* GetWorld()const;
 	void SetWorld(UWorld* InWorld);
+
+	//Threading management
+	bool Count();
 
 protected:
 	bool ModifierKeyState[EProjectTestModifierKey::Count];

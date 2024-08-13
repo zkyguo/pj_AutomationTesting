@@ -34,6 +34,12 @@ class UAutomationTestingBPLibrary : public UBlueprintFunctionLibrary
 	static bool StopRecording(const FString& InSavePath);
 
 	UFUNCTION(BlueprintCallable, meta = (Category = "ProjectTest"))
+	static void StartPlay();
+
+	UFUNCTION(BlueprintCallable, meta = (Category = "ProjectTest"))
+	static void StopPlay();
+
+	UFUNCTION(BlueprintCallable, meta = (Category = "ProjectTest"))
 	static void Register(UObject* InObject);
 
 	UFUNCTION(BlueprintCallable, meta = (Category = "Build"))

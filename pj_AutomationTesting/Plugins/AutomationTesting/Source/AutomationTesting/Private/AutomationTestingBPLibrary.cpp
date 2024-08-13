@@ -25,6 +25,18 @@ bool UAutomationTestingBPLibrary::StopRecording(const FString& InSavePath)
 	return false;
 }
 
+void UAutomationTestingBPLibrary::StartPlay()
+{
+	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
+	InModule.StartPlay();
+}
+
+void UAutomationTestingBPLibrary::StopPlay()
+{
+	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");
+	InModule.StopPlay();
+}
+
 void UAutomationTestingBPLibrary::Register(UObject* InObject)
 {
 	FAutomationTestingModule& InModule = FModuleManager::LoadModuleChecked<FAutomationTestingModule>("AutomationTesting");

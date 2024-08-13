@@ -103,7 +103,7 @@ namespace ProjectAutomationTest
 					//If all record input ends, stop play input 
 					FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
 						{
-
+							InModule.Count();
 						}, TStatId(), NULL, ENamedThreads::GameThread);
 
 					FTaskGraphInterface::Get().WaitUntilTaskCompletes(Task);
@@ -132,7 +132,7 @@ namespace ProjectAutomationTest
 
 					FGraphEventRef Task = FFunctionGraphTask::CreateAndDispatchWhenReady([&]()
 						{
-							
+							InModule.Count();
 						}, TStatId(), NULL, ENamedThreads::GameThread);
 
 					FTaskGraphInterface::Get().WaitUntilTaskCompletes(Task);

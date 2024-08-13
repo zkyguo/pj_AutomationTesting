@@ -10,6 +10,8 @@
 #include "Settings/SimpleProjectTestSettings.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "AutomationTestLog.h"
+#include "IAutomationDriver.h"
+#include "IAutomationDriverModule.h"
 #include "zlib.h"
 #include "Core/AutomationProjectTestMethod.h"
 
@@ -62,6 +64,25 @@ void FAutomationTestingModule::StopRecording()
 	}
 	TestState = EProjectTestState::Free;
 	CurrentTime = 0.f;
+}
+
+void FAutomationTestingModule::StartPlay()
+{
+	if(InputData.Num() > 0 || AxialInputData.Num() > 0)
+	{
+		CurrentTime = 0.f;
+		TestState = EProjectTestState::Playing;
+		MixCount = 0;
+
+		ProjectAutomationTest::StartAutomationTest(InputData, AxialInputData);
+	}
+}
+
+void FAutomationTestingModule::StopPlay()
+{
+	IAutomationDriverModule::Get().Disable();
+	MixCount = 0;
+	TestState = EProjectTestState::Free;
 }
 
 TStatId FAutomationTestingModule::GetStatId() const
@@ -578,6 +599,20 @@ UWorld* FAutomationTestingModule::GetWorld() const
 void FAutomationTestingModule::SetWorld(UWorld* InWorld)
 {
 	World = InWorld;
+}
+
+bool FAutomationTestingModule::Count()
+{
+	MixCount++;
+	if(MixCount >= 2)
+	{
+		StopPlay();
+		MixCount = 0;
+		return true;
+	}
+
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE
