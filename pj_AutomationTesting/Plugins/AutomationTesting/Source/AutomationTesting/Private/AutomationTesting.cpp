@@ -86,90 +86,106 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 	{
 		case WM_CHAR:
 		{
-			const TCHAR Character = IntCastChecked<TCHAR>(wParam);
-			const bool bIsRepeat = (lParam & 0x40000000) != 0;
-			OnKeyChar(Character, bIsRepeat);
-
+			if(const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
+			{
+				if(!InSettings->bCustomInput)
+				{
+					const TCHAR Character = IntCastChecked<TCHAR>(wParam);
+					const bool bIsRepeat = (lParam & 0x40000000) != 0;
+					OnKeyChar(Character, bIsRepeat);
+				}
+				
+			}
 			return true;
 		}
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 		{
-			const int32 Win32Key = IntCastChecked<int32>(wParam);
-			int32 ActualKey = Win32Key;
-
-			bool bIsRepeat = (lParam & 0x40000000) != 0;
-
-			switch (Win32Key)
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
 			{
-				case VK_MENU:
+				if (!InSettings->bCustomInput)
 				{
-					if ((lParam & 0x1000000) == 0)
-					{
-						ActualKey = VK_LMENU;
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftAlt];
-						ModifierKeyState[EProjectTestModifierKey::LeftAlt] = true;
-					}
-					else
-					{
-						ActualKey = VK_RMENU;
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightAlt];
-						ModifierKeyState[EProjectTestModifierKey::RightAlt] = true;
-					}
+					const int32 Win32Key = IntCastChecked<int32>(wParam);
+					int32 ActualKey = Win32Key;
 
-					break;
-				}
-				case VK_CONTROL:
-				{
-					if ((lParam & 0x1000000) == 0)
-					{
-						ActualKey = VK_LCONTROL;
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftControl];
-						ModifierKeyState[EProjectTestModifierKey::LeftControl] = true;
-					}
-					else
-					{
-						ActualKey = VK_RCONTROL;
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightControl];
-						ModifierKeyState[EProjectTestModifierKey::RightControl] = true;
-					}
-					break;
-				}
-				case VK_SHIFT:
-				{
-					ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
-					if (ActualKey == VK_LSHIFT)
-					{
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftShift];
-						ModifierKeyState[EProjectTestModifierKey::LeftShift] = true;
-					}
-					else
-					{
-						bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightShift];
-						ModifierKeyState[EProjectTestModifierKey::RightShift] = true;
-					}
-					break;
-				}
-				case VK_CAPITAL:
-					ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
-					break;
-				default:
-					// No translation needed
-					break;
-			}
-			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
-			const bool Result = OnKeyDown(ActualKey, CharCode, bIsRepeat);
+					bool bIsRepeat = (lParam & 0x40000000) != 0;
 
-			if (Result || wParam != WM_SYSKEYDOWN)
-			{
-				// Handled
-				return true;
+					switch (Win32Key)
+					{
+					case VK_MENU:
+					{
+						if ((lParam & 0x1000000) == 0)
+						{
+							ActualKey = VK_LMENU;
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftAlt];
+							ModifierKeyState[EProjectTestModifierKey::LeftAlt] = true;
+						}
+						else
+						{
+							ActualKey = VK_RMENU;
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightAlt];
+							ModifierKeyState[EProjectTestModifierKey::RightAlt] = true;
+						}
+
+						break;
+					}
+					case VK_CONTROL:
+					{
+						if ((lParam & 0x1000000) == 0)
+						{
+							ActualKey = VK_LCONTROL;
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftControl];
+							ModifierKeyState[EProjectTestModifierKey::LeftControl] = true;
+						}
+						else
+						{
+							ActualKey = VK_RCONTROL;
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightControl];
+							ModifierKeyState[EProjectTestModifierKey::RightControl] = true;
+						}
+						break;
+					}
+					case VK_SHIFT:
+					{
+						ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
+						if (ActualKey == VK_LSHIFT)
+						{
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::LeftShift];
+							ModifierKeyState[EProjectTestModifierKey::LeftShift] = true;
+						}
+						else
+						{
+							bIsRepeat = ModifierKeyState[EProjectTestModifierKey::RightShift];
+							ModifierKeyState[EProjectTestModifierKey::RightShift] = true;
+						}
+						break;
+					}
+					case VK_CAPITAL:
+						ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+						break;
+					default:
+						// No translation needed
+						break;
+					}
+					uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
+					const bool Result = OnKeyDown(ActualKey, CharCode, bIsRepeat);
+
+					if (Result || wParam != WM_SYSKEYDOWN)
+					{
+						// Handled
+						return true;
+					}
+				}
 			}
 			break;
 		}
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
 		{
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
+			{
+				if (!InSettings->bCustomInput)
+				{
 			int32 Win32Key = IntCastChecked<int32>(wParam);
 
 			int32 ActualKey = Win32Key;
@@ -178,63 +194,66 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 
 			switch (Win32Key)
 			{
-				case VK_MENU:
-					// Differentiate between left and right alt
-					if ((lParam & 0x1000000) == 0)
-					{
-						ActualKey = VK_LMENU;
-						ModifierKeyState[EProjectTestModifierKey::LeftAlt] = false;
-					}
-					else
-					{
-						ActualKey = VK_RMENU;
-						ModifierKeyState[EProjectTestModifierKey::RightAlt] = false;
-					}
-					break;
-				case VK_CONTROL:
-					// Differentiate between left and right control
-					if ((lParam & 0x1000000) == 0)
-					{
-						ActualKey = VK_LCONTROL;
-						ModifierKeyState[EProjectTestModifierKey::LeftControl] = false;
-					}
-					else
-					{
-						ActualKey = VK_RCONTROL;
-						ModifierKeyState[EProjectTestModifierKey::RightControl] = false;
-					}
-					break;
-				case VK_SHIFT:
-					// Differentiate between left and right shift
-					ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
-					if (ActualKey == VK_LSHIFT)
-					{
-						ModifierKeyState[EProjectTestModifierKey::LeftShift] = false;
-					}
-					else
-					{
-						ModifierKeyState[EProjectTestModifierKey::RightShift] = false;
-					}
-					break;
-				case VK_CAPITAL:
-					ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
-					break;
-				default:
-					// No translation needed
-					break;
+				
+			case VK_MENU:
+				// Differentiate between left and right alt
+				if ((lParam & 0x1000000) == 0)
+				{
+					ActualKey = VK_LMENU;
+					ModifierKeyState[EProjectTestModifierKey::LeftAlt] = false;
+				}
+				else
+				{
+					ActualKey = VK_RMENU;
+					ModifierKeyState[EProjectTestModifierKey::RightAlt] = false;
+				}
+				break;
+			case VK_CONTROL:
+				// Differentiate between left and right control
+				if ((lParam & 0x1000000) == 0)
+				{
+					ActualKey = VK_LCONTROL;
+					ModifierKeyState[EProjectTestModifierKey::LeftControl] = false;
+				}
+				else
+				{
+					ActualKey = VK_RCONTROL;
+					ModifierKeyState[EProjectTestModifierKey::RightControl] = false;
+				}
+				break;
+			case VK_SHIFT:
+				// Differentiate between left and right shift
+				ActualKey = MapVirtualKey((lParam & 0x00ff0000) >> 16, MAPVK_VSC_TO_VK_EX);
+				if (ActualKey == VK_LSHIFT)
+				{
+					ModifierKeyState[EProjectTestModifierKey::LeftShift] = false;
+				}
+				else
+				{
+					ModifierKeyState[EProjectTestModifierKey::RightShift] = false;
+				}
+				break;
+			case VK_CAPITAL:
+				ModifierKeyState[EProjectTestModifierKey::CapsLock] = (::GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+				break;
+			default:
+				// No translation needed
+				break;
 
-			}
+					}
 
-			uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
+					uint32 CharCode = ::MapVirtualKey(Win32Key, MAPVK_VK_TO_CHAR);
 
-			const bool bIsRepeat = false;
+					const bool bIsRepeat = false;
 
-			const bool Result = OnKeyUp(ActualKey, CharCode, bIsRepeat);
+					const bool Result = OnKeyUp(ActualKey, CharCode, bIsRepeat);
 
-			if (Result || wParam != WM_SYSKEYUP)
-			{
-				// Handled
-				return true;
+					if (Result || wParam != WM_SYSKEYUP)
+					{
+						// Handled
+						return true;
+					}
+				}
 			}
 			break;
 		}
@@ -252,91 +271,110 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 		case WM_RBUTTONUP:
 		case WM_XBUTTONUP:
 		{
-			POINT CursorPoint;
-			CursorPoint.x = GET_X_LPARAM(lParam);
-			CursorPoint.y = GET_Y_LPARAM(lParam);
-
-			EMouseButtons::Type MouseButton = EMouseButtons::Invalid;
-
-			bool bDoubleClick = false;
-			bool bMouseUp = false;
-
-			switch (msg)
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
 			{
-			case WM_LBUTTONDBLCLK:
-				bDoubleClick = true;
-				MouseButton = EMouseButtons::Left;
-				break;
-			case WM_LBUTTONUP:
-				bMouseUp = true;
-				MouseButton = EMouseButtons::Left;
-				break;
-			case WM_LBUTTONDOWN:
-				MouseButton = EMouseButtons::Left;
-				break;
-			case WM_MBUTTONDBLCLK:
-				bDoubleClick = true;
-				MouseButton = EMouseButtons::Middle;
-				break;
-			case WM_MBUTTONUP:
-				bMouseUp = true;
-				MouseButton = EMouseButtons::Middle;
-				break;
-			case WM_MBUTTONDOWN:
-				MouseButton = EMouseButtons::Middle;
-				break;
-			case WM_RBUTTONDBLCLK:
-				bDoubleClick = true;
-				MouseButton = EMouseButtons::Right;
-				break;
-			case WM_RBUTTONUP:
-				bMouseUp = true;
-				MouseButton = EMouseButtons::Right;
-				break;
-			case WM_RBUTTONDOWN:
-				MouseButton = EMouseButtons::Right;
-				break;
-			case WM_XBUTTONDBLCLK:
-				bDoubleClick = true;
-				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
-				break;
-			case WM_XBUTTONUP:
-				bMouseUp = true;
-				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
-				break;
-			case WM_XBUTTONDOWN:
-				MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
-				break;
-			default:
-				check(0);
-			}
+				if (!InSettings->bCustomInput)
+				{
+					POINT CursorPoint;
+					CursorPoint.x = GET_X_LPARAM(lParam);
+					CursorPoint.y = GET_Y_LPARAM(lParam);
 
-			const FVector2D APPCursorPoint = FSlateApplication::Get().GetCursorPos();
+					EMouseButtons::Type MouseButton = EMouseButtons::Invalid;
 
-			if (bMouseUp)
-			{
-				return OnMouseUp(MouseButton, APPCursorPoint) ? 0 : 1;
-			}
-			else if (bDoubleClick)
-			{
-				OnMouseDoubleClick(MouseButton, APPCursorPoint);
-			}
-			else
-			{
-				OnMouseDown(MouseButton, APPCursorPoint);
-			}
+					bool bDoubleClick = false;
+					bool bMouseUp = false;
 
+					switch (msg)
+					{
+					case WM_LBUTTONDBLCLK:
+						bDoubleClick = true;
+						MouseButton = EMouseButtons::Left;
+						break;
+					case WM_LBUTTONUP:
+						bMouseUp = true;
+						MouseButton = EMouseButtons::Left;
+						break;
+					case WM_LBUTTONDOWN:
+						MouseButton = EMouseButtons::Left;
+						break;
+					case WM_MBUTTONDBLCLK:
+						bDoubleClick = true;
+						MouseButton = EMouseButtons::Middle;
+						break;
+					case WM_MBUTTONUP:
+						bMouseUp = true;
+						MouseButton = EMouseButtons::Middle;
+						break;
+					case WM_MBUTTONDOWN:
+						MouseButton = EMouseButtons::Middle;
+						break;
+					case WM_RBUTTONDBLCLK:
+						bDoubleClick = true;
+						MouseButton = EMouseButtons::Right;
+						break;
+					case WM_RBUTTONUP:
+						bMouseUp = true;
+						MouseButton = EMouseButtons::Right;
+						break;
+					case WM_RBUTTONDOWN:
+						MouseButton = EMouseButtons::Right;
+						break;
+					case WM_XBUTTONDBLCLK:
+						bDoubleClick = true;
+						MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+						break;
+					case WM_XBUTTONUP:
+						bMouseUp = true;
+						MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+						break;
+					case WM_XBUTTONDOWN:
+						MouseButton = (HIWORD(wParam) & XBUTTON1) ? EMouseButtons::Thumb01 : EMouseButtons::Thumb02;
+						break;
+					default:
+						check(0);
+					}
+
+					const FVector2D APPCursorPoint = FSlateApplication::Get().GetCursorPos();
+
+					if (bMouseUp)
+					{
+						return OnMouseUp(MouseButton, APPCursorPoint) ? 0 : 1;
+					}
+					else if (bDoubleClick)
+					{
+						OnMouseDoubleClick(MouseButton, APPCursorPoint);
+					}
+					else
+					{
+						OnMouseDown(MouseButton, APPCursorPoint);
+					}
+
+					
+				}
+			}
 			return true;
 		}
 		case WM_INPUT:
 		{
-			OnMouseMove();
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
+			{
+				if (!InSettings->bCustomInput)
+				{
+					OnMouseMove();
+				}
+			}
 			break;
 		}
 		case WM_NCMOUSEMOVE:
 		case WM_MOUSEMOVE:
 		{
-			OnMouseMove();
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
+			{
+				if (!InSettings->bCustomInput)
+				{
+					OnMouseMove();
+				}
+			}
 			break;
 		}
 		case WM_TOUCH:
@@ -345,17 +383,22 @@ bool FAutomationTestingModule::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wPar
 		}
 		case WM_MOUSEWHEEL:
 		{
-			const float SpinFactor = 1 / 120.0f;
-			const SHORT WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+			if (const USimpleProjectTestSettings* InSettings = GetDefault<USimpleProjectTestSettings>())
+			{
+				if (!InSettings->bCustomInput)
+				{
+					const float SpinFactor = 1 / 120.0f;
+					const SHORT WheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
-			POINT CursorPoint;
-			CursorPoint.x = GET_X_LPARAM(lParam);
-			CursorPoint.y = GET_Y_LPARAM(lParam);
+					POINT CursorPoint;
+					CursorPoint.x = GET_X_LPARAM(lParam);
+					CursorPoint.y = GET_Y_LPARAM(lParam);
 
-			const FVector2D CursorPos(CursorPoint.x, CursorPoint.y);
+					const FVector2D CursorPos(CursorPoint.x, CursorPoint.y);
 
-			return OnMouseWheel(static_cast<float>(WheelDelta) * SpinFactor, FSlateApplication::Get().GetCursorPos());
-
+					return OnMouseWheel(static_cast<float>(WheelDelta) * SpinFactor, FSlateApplication::Get().GetCursorPos());
+				}
+			}
 			return false;
 		}
 		case WM_MOUSEACTIVATE:

@@ -8,6 +8,8 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "ToolMenus.h"
+#include "ISettingsModule.h"
+#include "Settings/SimpleProjectTestSettings.h"
 
 static const FName SimpleProjectTestEditorTabName("SimpleProjectTestEditor");
 
@@ -34,6 +36,15 @@ void FSimpleProjectTestEditorModule::StartupModule()
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(SimpleProjectTestEditorTabName, FOnSpawnTab::CreateRaw(this, &FSimpleProjectTestEditorModule::OnSpawnPluginTab))
 		.SetDisplayName(LOCTEXT("FSimpleProjectTestEditorTabTitle", "SimpleProjectTestEditor"))
 		.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	//register settings module into Unreal Settings Editor
+	if(ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>(TEXT("Settings")))
+	{
+		SettingsModule->RegisterSettings("Project", "ProjectTest", "TestSettings",
+			LOCTEXT("AutomationTesting","Test Settings"),
+			LOCTEXT("SimpleProjectTestEditor", "Test"),
+			GetMutableDefault<USimpleProjectTestSettings>());
+	}
 }
 
 void FSimpleProjectTestEditorModule::ShutdownModule()
